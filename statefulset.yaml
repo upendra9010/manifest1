@@ -1,12 +1,28 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: default
+spec:
+  clusterIP: None  # Headless service for StatefulSet
+  selector:
+    app: mysql
+  ports:
+  - port: 80
+    targetPort: 80
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mystatefulset
+  namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: mysql
+  serviceName: mysql-service
   template:
     metadata:
       labels:
@@ -17,17 +33,25 @@ spec:
         image: upendra9010/hockton:dbimage
         ports:
         - containerPort: 80
-        envFrom:                    # Fixed: changed from "envfrom" to "envFrom"
+        envFrom:
         - secretRef:
             name: mysecret
-        volumeMounts:               # Fixed: changed from "volumesMounts" to "volumeMounts"
+        volumeMounts:
         - name: dbvolume
           mountPath: /usr/share/nginx/html
-  volumeClaimTemplates:             # Moved: this should be at StatefulSet spec level, not container level
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+  volumeClaimTemplates:
   - metadata:
       name: dbvolume
     spec:
       accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard"  # FIX: This enables dynamic provisioning
       resources:
         requests:
           storage: 2Gi
