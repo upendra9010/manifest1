@@ -1,8 +1,11 @@
 apiVersion: networking.k8s.io/v1
-kind: Ingress 
+kind: Ingress
 metadata:
   name: myingress
-  annotations:nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: default
+  annotations:
+    argocd.argoproj.io/tracking-id: myapp:networking.k8s.io/Ingress:default/myingress
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
