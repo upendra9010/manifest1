@@ -17,21 +17,17 @@ spec:
         image: upendra9010/hockton:dbimage
         ports:
         - containerPort: 80
-
-        #secret-attached
-        envfrom:
-          - secretRef:
-              name: mysecret
-
-        volumesMounts:
-          - name: dbvolume
-              mountPath: /usr/share/nginx/html
-
-        volumeClaimTemplates:
-          - metadata:
-              name: dbvolume
-            spec:
-              accessModes: ["ReadWriteOnce"]
-              resources:
-                requests:
-                  storage: 2Gi
+        envFrom:                    # Fixed: changed from "envfrom" to "envFrom"
+        - secretRef:
+            name: mysecret
+        volumeMounts:               # Fixed: changed from "volumesMounts" to "volumeMounts"
+        - name: dbvolume
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:             # Moved: this should be at StatefulSet spec level, not container level
+  - metadata:
+      name: dbvolume
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 2Gi
